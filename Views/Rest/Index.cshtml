@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "REST API";
+}
+
+<h2>REST API та MVC vs API Контролери</h2>
+
+<h3>Обмеження REST</h3>
+<ul>
+    <li>Клієнт-серверна архітектура</li>
+    <li>Відсутність стану (stateless)</li>
+    <li>Кешування</li>
+    <li>Єдиний інтерфейс (Uniform Interface)</li>
+    <li>Шарова система (Layered System)</li>
+    <li>Код-на-вимогу (опціонально)</li>
+</ul>
+
+<h3>Порівняння MVC та API контролерів</h3>
+<table border="1">
+    <tr>
+        <th>Характеристика</th>
+        <th>MVC Контролер</th>
+        <th>API Контролер</th>
+    </tr>
+    <tr>
+        <td>Призначення</td>
+        <td>Віддає HTML-сторінки</td>
+        <td>Віддає JSON або XML</td>
+    </tr>
+    <tr>
+        <td>Спадкується від</td>
+        <td>`Controller`</td>
+        <td>`ApiController`</td>
+    </tr>
+    <tr>
+        <td>Маршрутизація</td>
+        <td>Залежить від `RouteConfig`</td>
+        <td>Атрибутна маршрутизація</td>
+    </tr>
+    <tr>
+        <td>Формати відповіді</td>
+        <td>HTML + View</td>
+        <td>JSON / XML</td>
+    </tr>
+</table>

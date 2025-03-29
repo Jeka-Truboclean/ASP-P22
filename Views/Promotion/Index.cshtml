@@ -1,0 +1,23 @@
+﻿@model List<ASP_P22.Data.Entities.Promotion>
+
+<h2>Список акцій</h2>
+
+<table>
+    <tr>
+        <th>Назва</th>
+        <th>Опис</th>
+        <th>Знижка</th>
+        <th>Дата початку</th>
+        <th>Дата завершення</th>
+    </tr>
+    @foreach (var promo in Model)
+    {
+        <tr>
+            <td>@promo.Name</td>
+            <td>@promo.Description</td>
+            <td>@promo.DiscountPercentage%</td>
+            <td>@promo.StartDate.ToShortDateString()</td>
+            <td>@promo.EndDate.ToShortDateString()</td>
+        </tr>
+    }
+</table>

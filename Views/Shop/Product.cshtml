@@ -1,0 +1,106 @@
+﻿@model ASP_P22.Models.Shop.ShopProductPageModel
+
+@{
+    ViewData["Title"] = "Крамниця";
+
+}
+
+@if (Model.Product == null)
+{
+    <div class="text-center">
+        <h1 class="display-4">Крамниця - товар не знайдено</h1>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Крамниця - товар "@(Model.Product.Name)"</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-4 product-images">
+            @if(Model.Product.ImagesCsv == null)
+            {
+                <p>У даного товару немає фотографій</p>
+            }
+            else
+            {
+                foreach(String imgUrl in Model.Product.ImagesCsv.Split(",", StringSplitOptions.RemoveEmptyEntries))
+                {
+                    <img src="@("/Storage/Item/" + imgUrl)" alt="imgUrl" />
+                }
+            }
+        </div>
+        <div class="col-8">
+            <h2>@Model.Product.Name</h2>
+            <p>@Model.Product.Description</p>
+            <strong>@Model.Product.Price</strong>
+            <p>Наявність на складі: @Model.Product.Stock шт</p>
+            <p>Товарна група: 
+                <a asp-controller="Shop" 
+                asp-action="Category"
+                asp-route-id="@Model.Product.Category.Slug" 
+                title="@Model.Product.Category.Description">@Model.Product.Category.Name</a>
+            </p>
+            <div data-cart-product="@Model.Product.Id" class="btn btn-success">
+                <i class="bi bi-cart-plus"></i> Купити
+            </div>
+            <hr/>
+            <div class="row">
+                <div class="col">
+                    Загальна оцінка: @(!Model.Product.Rates.Any() ? "немає даних" :
+                Model.Product.Rates.Average(r => r.Rating))
+                    <br />
+                    @if (Model.CanUserRate)
+                    {
+                        <p>Оцінити: <input id="rate-rating" type="number" value="@(Model.UserRate?.Rating ?? 5)" /></p>
+                        <p>
+                            Коментувати: <textarea id="rate-comment">@Model.UserRate?.Comment</textarea>
+                        </p>
+                        @if (Model.UserRate != null)
+                        {
+                            <i>Ви залишили оцінку @Model.UserRate.Moment</i>
+                        }
+                        <button class="btn btn-outline-secondary"
+                        id="rate-button"
+                        type="button"
+                        data-rate-user="@Model.AuthUserId"
+                        data-rate-product="@Model.Product.Id">
+                            Зберегти коментар
+                        </button>
+                    }
+                    else
+                    {
+                        <i>Коментувати можуть тільки ті, хто купляв даний товар</i>
+                    }
+                </div>
+                <div class="col">
+                    <h5>Коментарі:</h5>
+                    @foreach (var rate in Model.Product.Rates ?? [])
+                    {
+                        if(rate.Comment != null)
+                        {
+                            @Html.DisplayFor(m => rate)
+                        }
+                    }
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <div>
+        <b>Аналогічні товари:</b>
+        @foreach(var product in Model.Product.Category.Products)
+        {
+            if (product.Id != Model.Product.Id)
+            {
+                <a asp-controller="Shop" asp-action="Product" asp-route-id="@(product.Slug ?? product.Id.ToString())">@product.Name</a>
+            }            
+        }
+    </div>
+
+}
