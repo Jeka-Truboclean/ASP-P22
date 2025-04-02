@@ -100,89 +100,33 @@ namespace ASP_P22.Controllers
             return Json(new { status = 200, message = "OK", data = givenRate });
         }
 
-        [HttpPut]
-        public JsonResult AddToCart([FromRoute] String id)
+        [HttpPost("add-to-cart/{id}")]
+        public JsonResult AddToCart([FromRoute] string id)
         {
-            /* Д.З. Переробити метод AddToCart в класі ShopController
-             * з урахуванням створення спільного методу AddToCart
-             * у класі DataAccessor
-             */
-            String? userId = HttpContext
+            string? userId = HttpContext
                 .User
                 .Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Sid)
                 ?.Value;
 
-            if(userId == null)
+            if (userId == null)
             {
-                return Json(new { status = 401, message = "UnAuthorized" });
-            }
-            Guid uid = Guid.Parse(userId);
-
-            // Перевіряємо id на UUID 
-            Guid productId;
-            try { productId = Guid.Parse(id); }
-            catch
-            {
-                return Json(new { status = 400, message = "UUID required" });
-            }
-            // Перевіряємо id на належність товару
-            var product = _dataContext
-                .Products
-                .FirstOrDefault(p => p.Id == productId);
-            if (product == null)
-            {
-                return Json(new { status = 404, message = "Product not found" });
+                return Json(new { status = 401, message = "Unauthorized" });
             }
 
-            // Шукаємо відкритий кошик користувача
-            var cart = _dataContext
-                .Carts
-                .FirstOrDefault(
-                    c => c.UserId == uid &&
-                    c.MomentBuy == null &&
-                    c.MomentCancel == null);
-
-            if (cart == null)  // немає відкритого - тоді відкриваємо новий
+            try
             {
-                cart = new Data.Entities.Cart()
-                {
-                    Id = Guid.NewGuid(),
-                    MomentOpen = DateTime.Now,
-                    UserId = uid,
-                    Price = 0
-                };
-                _dataContext.Carts.Add(cart);
+                _dataAccessor.AddToCart(userId, id);
+                return Json(new { status = 201, message = "Created" });
             }
-
-            // Перевіряємо чи є такий товар у кошику
-            var cd = _dataContext
-                .CartDetails
-                .FirstOrDefault(d =>
-                    d.CartId == cart.Id &&
-                    d.ProductId == product.Id
-                );
-            if (cd != null)  // товар вже є у кошику
+            catch (FormatException)
             {
-                cd.Cnt += 1;
-                cd.Price += product.Price;
+                return Json(new { status = 400, message = "Invalid UUID format" });
             }
-            else   // товару немає - створюємо новий запис
+            catch (Exception ex)
             {
-                cd = new Data.Entities.CartDetail()
-                {
-                    Id = Guid.NewGuid(),
-                    Moment = DateTime.Now,
-                    CartId = cart.Id,
-                    ProductId = product.Id,
-                    Cnt = 1,
-                    Price = product.Price
-                };
-                _dataContext.CartDetails.Add(cd);
+                return Json(new { status = 400, message = ex.Message });
             }
-            cart.Price += product.Price;
-            _dataContext.SaveChanges();
-            return Json(new { status = 201, message = "Created" });
         }
 
         [HttpPatch]
