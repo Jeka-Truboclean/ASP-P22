@@ -7,6 +7,8 @@
     ? Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
     : null;
 
+    String? userPhoto = Context.User.Claims.FirstOrDefault(c => c.Type == "PhotoUrl")?.Value;
+
     String? userSlug = 
         Context
         .User
@@ -53,11 +55,47 @@
                                asp-action="Cart"
                                title="Мій кошик"><i class="bi bi-cart"></i></a>
 
-                            <a asp-controller="User" 
+                            <a asp-controller="User"
                                asp-action="Profile"
                                asp-route-id="@userSlug"
-                               title="@(userName)">@firstLetter</a>
-                            
+                               title="@(userName)" class="profile-link">
+
+                                @if (!string.IsNullOrEmpty(userPhoto))
+                                {
+                                    <img src="~/Storage/@userPhoto" alt="ERROR" class="profile-photo">
+                                }
+                                else
+                                {
+                                    <span class="profile-initial">@firstLetter</span>
+                                }
+                                <style>
+                                    .profile-link {
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        overflow: hidden;
+                                        background-color: #f0f0f0;
+                                        text-decoration: none;
+                                        font-weight: bold;
+                                        color: #333;
+                                    }
+
+                                    .profile-photo {
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                    }
+
+                                    .profile-initial {
+                                        font-size: 18px;
+                                    }
+                                </style>
+                            </a>
+
                             <a href="?logout" class="btn btn-outline-danger">
                                 <i class="bi bi-box-arrow-right"></i>
                             </a>
@@ -90,6 +128,9 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        const isAuthenticated = @User.Identity.IsAuthenticated.ToString().ToLower(); // true або false
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 
 

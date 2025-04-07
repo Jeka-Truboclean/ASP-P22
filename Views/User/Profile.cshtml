@@ -20,7 +20,31 @@
                                 </div>
                                 <h6 class="f-w-600">@Model.Name</h6>
                                 <p>@Model.Role</p>
-                                <i class=" mdi mdi-square-edit-outline feather icon-edit m-t-10 f-16"></i>
+                                @if (Model.IsOwner)
+                                {
+                                    <form id="photoForm" asp-controller="User" asp-action="UpdatePhoto" method="post" enctype="multipart/form-data" class="d-inline">
+                                        <label class="btn btn-outline-dark">
+                                            <i class="bi bi-upload"></i>
+                                            <input type="file" id="photoInput" name="newPhoto" class="d-none" onchange="enableUpdateButton()">
+                                        </label>
+                                        <button type="submit" id="updateButton" class="btn btn-outline-primary" disabled>
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                }
+
+                                <script>
+                                    function enableUpdateButton() {
+                                        document.getElementById('updateButton').disabled = !document.getElementById('photoInput').files.length;
+                                    }
+
+                                    document.getElementById('photoForm').addEventListener('submit', function (event) {
+                                        if (!document.getElementById('photoInput').files.length) {
+                                            event.preventDefault();
+                                        }
+                                    });
+                                </script>
+
                             </div>
                         </div>
                         <div class="col-sm-5">

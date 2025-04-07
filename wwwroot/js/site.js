@@ -30,6 +30,19 @@
     }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    const promoCreateLink = document.querySelector('a[href="Promotion/Create"]');
+    if (promoCreateLink) {
+        promoCreateLink.addEventListener('click', function (e) {
+            if (!isAuthenticated) {
+                e.preventDefault();
+                alert("Увійдіть до системи, щоб додати акцію.");
+            }
+        });
+    }
+
+});
+
 function rateClick(e) {
     const btn = e.target.closest("[data-rate-user]");
     const userId = btn.getAttribute("data-rate-user");
@@ -37,7 +50,7 @@ function rateClick(e) {
     const ta = document.getElementById("rate-comment");
     if (!ta) throw "#rate-comment not found";
     const comment = ta.value.trim();
-    const rr = document.getElementById("rate-rating");
+    const rr = document.getElementById("rate-rating"); 
     if (!rr) throw "#rate-rating not found";
     const rating = rr.value;
     fetch("/Shop/Rate", {

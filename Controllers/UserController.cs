@@ -83,6 +83,27 @@ namespace ASP_P22.Controllers
             return View(pageModel);
         }
 
+        [HttpPost]
+        public IActionResult UpdatePhoto(IFormFile newPhoto)
+        {
+            string? sid = HttpContext.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+
+            if (sid is null || newPhoto == null || newPhoto.Length == 0)
+                return RedirectToAction("Profile", new { id = "" });
+
+            var user = _dataContext.Users.FirstOrDefault(u => u.Id.ToString() == sid);
+            if (user == null) return RedirectToAction("Profile", new { id = "" });
+
+            // Сохраняем новое фото
+            string savedName = _storageService.Save(newPhoto);
+            user.PhotoUrl = savedName;
+
+            _dataContext.SaveChanges();
+
+            return RedirectToAction("Profile", new { id = user.Slug });
+        }
+
         public ViewResult Cart(String? id)
         {
             UserCartPageModel model = new();
@@ -199,6 +220,7 @@ namespace ASP_P22.Controllers
                 kdf.GetSection("DkLength").Get<uint>()
             );
         }
+
         
         private (bool, Dictionary<String,String>) ValidateUserSignUpFormModel(UserSignUpFormModel? formModel)
         {

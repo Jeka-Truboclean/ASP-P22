@@ -45,6 +45,7 @@ namespace ASP_P22.Middleware.Auth
                             new Claim( ClaimTypes.Name, user.Name ),
                             new Claim( ClaimTypes.Email, user.Email ),
                             new Claim( ClaimTypes.NameIdentifier, user.Slug ),
+                            new Claim( "PhotoUrl", user.PhotoUrl ),
                         ],
                         nameof(AuthSessionMiddleware)
                     )

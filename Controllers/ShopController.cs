@@ -182,28 +182,17 @@ namespace ASP_P22.Controllers
             }
             cart.Price += product.Price;
             _dataContext.SaveChanges();
-            try
-            {
-                // Викликаємо метод AddToCart з DataAccessor
-                _dataAccessor.AddToCart(userId, id);
-                return Json(new { status = 201, message = "Created" });
-            }
-            catch (FormatException)
-            {
-                return Json(new { status = 400, message = "UUID required" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = 400, message = ex.Message });
-            }
+            return Json(new { status = 201, message = "Created" });
         }
 
         [HttpPatch]
         public JsonResult ModifyCart([FromRoute] String id, [FromQuery] int delta)
         {
+            String? userId = HttpContext.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
             try
             {
-                _dataAccessor.ModifyCart(id, delta);
+                _dataAccessor.ModifyCart(id, delta, userId);
                 return Json(new { status = 202, message = "Accepted" });
             }
             catch(Win32Exception ex)

@@ -1,5 +1,4 @@
-﻿using ASP_P22.Data.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ASP_P22.Data
 {
@@ -14,29 +13,13 @@ namespace ASP_P22.Data
         public DbSet<Entities.Rate>       Rates       { get; set; }
         public DbSet<Entities.AuthToken>  AuthTokens  { get; set; }
         public DbSet<Entities.UserRole>   UserRoles   { get; set; }
-        public DbSet<Entities.Promotion>  Promotions   { get; set; }
+        public DbSet<Entities.Promotion>  Promotions { get; set; }
 
 
         public DataContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>()
-            .HasMany(p => p.Promotions)
-            .WithMany(p => p.Products)
-            .UsingEntity(j => j.ToTable("ProductPromotions"));
-
-            modelBuilder.Entity<Promotion>().HasData(
-                new Promotion
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Весняний розпродаж",
-                    Description = "Знижка на всі товари 10%",
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddMonths(1),
-                    DiscountPercentage = 10
-                }
-            );
             modelBuilder.HasDefaultSchema("site");
 
             modelBuilder.Entity<Entities.UserAccess>()

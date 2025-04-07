@@ -4,6 +4,7 @@ using ASP_P22.Middleware.Auth;
 using ASP_P22.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Security.Claims;
 
@@ -98,20 +99,41 @@ namespace ASP_P22.Controllers
                 res.Data = HttpContext.Items[nameof(AuthTokenMiddleware)];
                 return res;
             }
-            /*
-             Д.З. У методі DoPatch у контролері ApiCartController
-            Реалізувати перевірку того, що передані зміни відбуваються у кошику,
-            який належить авторизованому користувачеві. */
+
             try
             {
-                _dataAccessor.ModifyCart(id, delta);
+                // Перевірка, що CartDetail належить авторизованому користувачу
+                Guid cartDetailId = Guid.Parse(id);
+                var cartDetail = _dataAccessor
+                    .DataContext
+                    .CartDetails
+                    .Include(cd => cd.Cart)
+                    .FirstOrDefault(cd => cd.Id == cartDetailId);
+
+                if (cartDetail == null)
+                {
+                    throw new Win32Exception(404, "CartDetail not found");
+                }
+
+                if (cartDetail.Cart.UserId.ToString() != userId)
+                {
+                    throw new Win32Exception(403, "Access denied: CartDetail does not belong to current user");
+                }
+
+                // Зміна кількості товару в кошику
+                _dataAccessor.ModifyCart(id, delta, userId);
                 res.Data = _dataAccessor.GetCartInfo(userId, null);
             }
             catch (Win32Exception ex)
             {
                 res.Status = new() { Code = ex.ErrorCode, IsSuccess = false, Phrase = ex.Message };
             }
+            catch (Exception ex)
+            {
+                res.Status = new() { Code = 400, IsSuccess = false, Phrase = ex.Message };
+            }
             return res;
         }
+
     }
 }

@@ -23,6 +23,7 @@ namespace ASP_P22.Data
             IConfiguration configuration)
     {
         private readonly DataContext _dataContext = dataContext;
+        public DataContext DataContext => _dataContext;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IKdfService _kdfService = kdfService;
         private readonly IConfiguration _configuration = configuration;
@@ -147,7 +148,7 @@ namespace ASP_P22.Data
             return cart;
         }
 
-        public void ModifyCart(String id, int delta)
+        public void ModifyCart(String id, int delta, String userId)
         {
             Guid cartDetailId;
             try
@@ -172,19 +173,23 @@ namespace ASP_P22.Data
             {
                 throw new Win32Exception(404, "id respond no item");
             }
-            // Перевіряємо delta
-            // 1) що її врахування не призведе до від"ємних чисел
+
+            if (cartDetail.Cart.UserId.ToString() != userId)
+            {
+                throw new Win32Exception(403, "Access denied: CartDetail does not belong to user");
+            }
+
             if (cartDetail.Cnt + delta < 0)
             {
                 throw new Win32Exception(422, "decrement too large");
             }
-            // 2) що кількість не перевищує товарні залишки
+
             if (cartDetail.Cnt + delta > cartDetail.Product.Stock)
             {
                 throw new Win32Exception(406, "increment too large");
             }
 
-            if (cartDetail.Cnt + delta == 0)  // видалення останнього
+            if (cartDetail.Cnt + delta == 0)
             {
                 cartDetail.Cart.Price += delta * cartDetail.Product.Price;
                 _dataContext.CartDetails.Remove(cartDetail);
@@ -197,6 +202,7 @@ namespace ASP_P22.Data
             }
             _dataContext.SaveChanges();
         }
+
 
         public Entities.AuthToken CreateTokenForUserAccess(Entities.UserAccess userAccess)
         {

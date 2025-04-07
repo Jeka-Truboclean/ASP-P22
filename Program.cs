@@ -5,6 +5,7 @@ using ASP_P22.Services.Kdf;
 using ASP_P22.Services.Random;
 using ASP_P22.Services.Storage;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,9 +64,17 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
 app.UseSession();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Storage")),
+    RequestPath = "/Storage/Item"
+});
+
 
 app.UseAuthSession();
-app.UseAuthToken();
+// app.UseAuthToken();
+app.UseJwtToken();
 
 app.MapControllerRoute(
     name: "default",
